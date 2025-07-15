@@ -4,7 +4,7 @@ import sys
 
 def download_data(var):
     print(var)
-    url = f"https://public.hub.geosphere.at/datahub/resources/spartacus-v2-1d-1km/filelisting/SPARTACUS2-DAILY_{var}_2025.nc"
+    url = f"https://public.hub.geosphere.at/datahub/resources/spartacus-v2-1d-1km/filelisting/{var}/SPARTACUS2-DAILY_{var}_2025.nc"
     filename = os.path.basename(url)
     base = "/tmp"
     urlretrieve(url, os.path.join(base,filename))
