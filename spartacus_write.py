@@ -3,11 +3,15 @@ import numpy as np
 import zarr
 import os
 import sys
+import datetime
 
 def write_data(var):
-    year = 2025
+
+    today = datetime.date.today()- datetime.timedelta(days=3)
+    year = today.strftime('%Y')
+    
     fill_value = -999
-    artifact_path = f"/tmp/SPARTACUS2-DAILY_{var}_{year}.nc"
+    artifact_path = f"/tmp/SPARTACUS2-DAILY_{var}_2025.nc"
     zarr_path = "/eodc/private/tempearth/SPARTACUS.zarr"
    
 
