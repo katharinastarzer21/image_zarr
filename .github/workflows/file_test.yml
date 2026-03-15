@@ -1,0 +1,51 @@
+name: Check NOAA dataset availability
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check dataset availability
+        id: check
+        run: |
+          URL="https://psl.noaa.gov/thredds/dodsC/Datasets/noaa.ersst.v5/sst.mnmean.nc"
+          if curl -fsS --max-time 60 -o /dev/null "$URL"; then
+            echo "available=true" >> $GITHUB_OUTPUT
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check whether alert issue already exists
+        if: steps.check.outputs.available == 'true'
+        id: existing_issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          count=$(gh issue list \
+            --state open \
+            --search 'NOAA dataset available in:title' \
+            --json number \
+            --jq 'length')
+          echo "count=$count" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub issue alert
+        if: steps.check.outputs.available == 'true' && steps.existing_issue.outputs.count == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "NOAA dataset available" \
+            --body "The dataset is now reachable:
+
+          https://psl.noaa.gov/thredds/dodsC/Datasets/noaa.ersst.v5/sst.mnmean.nc
+
+          Checked automatically by GitHub Actions."
